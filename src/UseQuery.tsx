@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useState } from 'react';
 
 type UseQueryResult = {
   data?: string;
@@ -7,11 +7,14 @@ type UseQueryResult = {
   error?: string;
 };
 
+type UseLazyQueryResult = [() => void, UseQueryResult];
+
 type FakeAbortSignal = {
   timeoutId: number;
 };
 
 class FakeAbortController {
+  id = Math.random();
   signal: FakeAbortSignal = {
     timeoutId: 0,
   };
@@ -32,6 +35,7 @@ function fakeFetch(signal: FakeAbortSignal): Promise<string> {
   });
 }
 
+// Automatically execute a query.
 function useQuery(): UseQueryResult {
   const [data, setData] = useState<string>();
   const [loading, setLoading] = useState(true);
@@ -61,15 +65,61 @@ function useQuery(): UseQueryResult {
   return { data, loading, error };
 }
 
+// Manually execute a query.
+function useLazyQuery(): UseLazyQueryResult {
+  const [data, setData] = useState<string>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState();
+  // The 'controller' object construction makes the dependencies of useEffect hook change on every render.
+  const controller = useMemo(() => new FakeAbortController(), []);
+
+  useEffect(() => {
+    return () => {
+      controller.abort();
+    };
+  }, [controller]);
+
+  function execute() {
+    controller.abort(); // allow only one fetch at a time
+    setLoading(true);
+    setData(undefined);
+    setError(undefined);
+
+    fakeFetch(controller.signal)
+      .then((data) => setData(data))
+      .catch((reason) => setError(reason))
+      .finally(() => setLoading(false));
+  }
+
+  return [execute, { data, loading, error }];
+}
+
+const groupStyle: CSSProperties = {
+  border: '1px solid black',
+  padding: '10px',
+  marginBottom: '20px',
+};
+
 export const UseQuery: React.FC = () => {
   const { data, loading, error } = useQuery();
+  const [fetch, { data: lazyData, loading: lazyLoading, error: lazyError }] = useLazyQuery();
   return (
     <>
-      <Button>Go</Button>
       {/* Can't be `Error: {error}` because boolean/undefined/null values are not rendered */}
-      <div>{`Loading: ${loading}`}</div>
-      <div>{`Data: ${data}`}</div>
-      <div>{`Error: ${error}`}</div>
+      <div style={groupStyle}>
+        <div>useQuery</div>
+        <div>{`Loading: ${loading}`}</div>
+        <div>{`Data: ${data}`}</div>
+        <div>{`Error: ${error}`}</div>
+      </div>
+      <div style={groupStyle}>
+        <div>
+          useLazyQuery <Button onClick={fetch}>Go</Button>
+        </div>
+        <div>{`Loading: ${lazyLoading}`}</div>
+        <div>{`Data: ${lazyData}`}</div>
+        <div>{`Error: ${lazyError}`}</div>
+      </div>
     </>
   );
 };
