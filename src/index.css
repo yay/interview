@@ -67,3 +67,16 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.app-header {
+    border: 1px solid black;
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+.app-link {
+    color: #00b22a;
+}
+.app-link:hover {
+    color: #00ff3c;
+}

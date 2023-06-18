@@ -51,9 +51,9 @@ function useQuery(): UseQueryResult {
       // We kinda need to cancel the Promise here because React runs
       // one extra setup+cleanup cycle in development for every Effect:
       // https://react.dev/reference/react/StrictMode#fixing-bugs-found-by-re-running-effects-in-development
-      // However Promises are not cancellable.
-      // Real `fetch` requests are however. So we can mimic our fakeFetch to resemble real fetch by
-      // implementing our own AbortSignal and AbortController.
+      // However Promises are not cancellable, but real `fetch` requests are.
+      // So we can mimic our fakeFetch to resemble real fetch by implementing our own
+      // AbortSignal and AbortController.
       controller.abort();
     };
   }, []);
