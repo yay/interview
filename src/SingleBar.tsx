@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC } from 'react';
 import Chart from './Chart';
 import { Box } from '@mui/material';
 import { BarSeriesOption } from 'echarts';
@@ -39,7 +39,7 @@ export type SingleBarFooterProps = SingleBarRenderParams;
 
 export const SingleBarFoooter: FC<SingleBarFooterProps> = (props) => {
   const { overlap } = props;
-  return overlap ? <div>Overlap!!!</div> : null;
+  return overlap ? <div>Footer</div> : null;
 };
 
 export const SingleBar: FC<SingleBarProps> = (props) => {

@@ -7,7 +7,10 @@ export interface ChartProps extends echarts.EChartsOption {
   ref?: React.MutableRefObject<ChartApi | undefined>;
   renderer?: 'canvas' | 'svg';
   theme?: string;
+  setOptions?: echarts.SetOptionOpts;
 }
+
+const replaceMerge = ['series', 'xAxis', 'yAxis'];
 
 export const useChartApiRef = () => useRef<ChartApi>();
 
@@ -66,7 +69,10 @@ const EChart = React.forwardRef<ChartApi, ChartProps>((props, ref) => {
 
   const chart = chartApiRef.current;
   if (chart) {
-    chart.setOption(props);
+    chart.setOption(props, {
+      replaceMerge,
+      ...(props.setOptions || {}),
+    });
   }
 
   return <div ref={chartContainerRef} style={autoSizeStyle} />;
